@@ -17,7 +17,7 @@ Rules and rates are **as of 26 October 2026** (`AS_OF` in `src/data/learn.ts`).
 
 - Vite 8, React 19, TypeScript 7 (strict), plain CSS. No backend, no router library, no UI kit.
 - Node 22+. `npm install`, `npm run dev` (port 5173), `npm run build` (runs `tsc --noEmit` then `vite build` → `dist/`), `npm run preview` (port 4173), `npm test` (Vitest, `src/calc/totals.test.ts`).
-- Deploy target: Netlify. `netlify.toml` sets build command, `dist`, Node 22 and an SPA redirect.
+- Live on Cloudflare Pages: https://insurance-tool-kit.pages.dev (build `npm run build`, output `dist`, env `NODE_VERSION=22`); every push to `main` redeploys. `netlify.toml` is kept as a fallback for Netlify.
 
 ## Layout
 

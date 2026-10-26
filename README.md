@@ -1,5 +1,7 @@
 # Insurance Tool Kit
 
+**Live site: [insurance-tool-kit.pages.dev](https://insurance-tool-kit.pages.dev)**
+
 Learn Indian insurance from the basics to expert level, practise for interviews, and work out premiums step by step, all in one free study website.
 
 It is written for anyone new to the domain, and especially for **Business Analysts** moving into insurance. Rules and rates are as of **26 October 2026**.
@@ -99,7 +101,7 @@ npm run dev        # http://localhost:5173
 - [Vite 8](https://vite.dev), [React 19](https://react.dev) and [TypeScript 7](https://www.typescriptlang.org) (strict)
 - Plain CSS with light and dark themes, no UI library, no backend
 - [Vitest](https://vitest.dev) for tests
-- Static output in `dist/`, with Netlify settings already in `netlify.toml`
+- Static output in `dist/`, hosted on Cloudflare Pages
 
 ## Project structure
 
@@ -128,11 +130,18 @@ src/
 
 ## Deploy
 
-`netlify.toml` already sets the build command (`npm run build`), publish folder (`dist`), Node 22 and an SPA redirect.
+The site is hosted on **Cloudflare Pages** at [insurance-tool-kit.pages.dev](https://insurance-tool-kit.pages.dev). Every push to `main` rebuilds and publishes it automatically.
 
-- **From GitHub:** in Netlify, choose **Add new site → Import an existing project** and pick this repo.
-- **Drag and drop:** run `npm run build` and drop the `dist` folder on [app.netlify.com/drop](https://app.netlify.com/drop).
-- **CLI:** `npx netlify-cli deploy --build --prod`
+Cloudflare Pages settings:
+
+| Setting | Value |
+|---|---|
+| Framework preset | None |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Environment variable | `NODE_VERSION` = `22` |
+
+`netlify.toml` is also kept in the repo, so the site can be deployed to Netlify with no extra setup if needed.
 
 ## Keeping it up to date
 
