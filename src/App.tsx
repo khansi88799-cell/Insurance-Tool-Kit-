@@ -24,8 +24,8 @@ export default function App() {
               <path d="M12 16l3 3 5-6" />
             </svg>
             <span>
-              <strong>Insurance BA Desk</strong>
-              <small>Indian insurance for Business Analysts</small>
+              <strong>Insurance Learning Desk</strong>
+              <small>Indian insurance guide, from beginner to pro</small>
             </span>
           </a>
           <span className="asof">
