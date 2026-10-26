@@ -2,12 +2,32 @@ import { useMemo, useState } from "react";
 import { CATEGORIES, QUESTIONS, type Category, type Question } from "../data/interview";
 import { useStoredState } from "../hooks";
 import type { ProductId } from "../calc/types";
+import { DIAGRAM_TITLE, type DiagramId } from "./Diagrams";
 
 type Level = Question["level"] | "All";
 
-export default function Interview({ onOpenCalc }: { onOpenCalc: (p: ProductId) => void }) {
+/** Category from the URL, e.g. #interview/Motor; anything unknown shows all */
+function categoryFrom(sub: string): Category | "All" {
+  let c = sub;
+  try {
+    c = decodeURIComponent(sub);
+  } catch {
+    /* malformed hash */
+  }
+  return CATEGORIES.includes(c as Category) ? (c as Category) : "All";
+}
+
+export default function Interview({
+  onOpenCalc,
+  onOpenDiagram,
+  initialCategory = "",
+}: {
+  onOpenCalc: (p: ProductId) => void;
+  onOpenDiagram: (d: DiagramId) => void;
+  initialCategory?: string;
+}) {
   const [query, setQuery] = useState("");
-  const [cat, setCat] = useState<Category | "All">("All");
+  const [cat, setCat] = useState<Category | "All">(() => categoryFrom(initialCategory));
   const [level, setLevel] = useState<Level>("All");
   const [showAll, setShowAll] = useState(false);
   const [open, setOpen] = useState<Record<string, boolean>>({});
@@ -43,8 +63,8 @@ export default function Interview({ onOpenCalc }: { onOpenCalc: (p: ProductId) =
       <section className="intro">
         <h1>Interview questions, updated for 2026 rules</h1>
         <p>
-          {QUESTIONS.length} questions with short model answers you can say out loud. Answer first, then reveal. Mark each one practised when you can answer it
-          without looking.
+          {QUESTIONS.length} questions from core to advanced: concepts, calculations, whiteboard diagrams, SQL, scenarios and behavioural. Answer out loud first,
+          then reveal the model answer and example. Mark each one practised when you can answer it without looking.
         </p>
       </section>
 
@@ -94,16 +114,29 @@ export default function Interview({ onOpenCalc }: { onOpenCalc: (p: ProductId) =
               </div>
               <h3>{x.q}</h3>
               {isOpen ? (
-                <ul className="answer">
-                  {x.a.map((a) => (
-                    <li key={a}>{a}</li>
-                  ))}
-                </ul>
+                <>
+                  <ul className="answer">
+                    {x.a.map((a) => (
+                      <li key={a}>{a}</li>
+                    ))}
+                  </ul>
+                  {x.ex && (
+                    <div className={`example${x.cat === "Data and SQL" ? " code" : ""}`}>
+                      <b>{x.cat === "Data and SQL" ? "Example query" : "Example"}</b>
+                      {x.ex}
+                    </div>
+                  )}
+                </>
               ) : null}
               <div className="qactions">
                 {!showAll && (
                   <button type="button" className="btn ghost" aria-expanded={!!isOpen} onClick={() => setOpen((o) => ({ ...o, [x.id]: !o[x.id] }))}>
                     {isOpen ? "Hide answer" : "Reveal answer"}
+                  </button>
+                )}
+                {x.diagram && (
+                  <button type="button" className="btn ghost" onClick={() => onOpenDiagram(x.diagram as DiagramId)}>
+                    See the diagram: {DIAGRAM_TITLE[x.diagram]} →
                   </button>
                 )}
                 {x.try && (

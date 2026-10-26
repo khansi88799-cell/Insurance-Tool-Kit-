@@ -1,3 +1,7 @@
+import type { ProductId } from "../calc/types";
+import type { Category } from "./interview";
+import type { DiagramId } from "../components/Diagrams";
+
 export interface Point {
   /** The idea to be able to explain */
   t: string;
@@ -12,6 +16,8 @@ export interface Topic {
   title: string;
   /** Why this topic matters, shown above the points */
   intro: string;
+  /** Reference diagram for this topic */
+  diagram?: DiagramId;
   points: Point[];
 }
 
@@ -104,6 +110,7 @@ export const MODULES: Module[] = [
       {
         id: "parties",
         title: "Parties in the value chain",
+        diagram: "parties",
         intro: "Most requirements involve several parties. Getting their roles right avoids data model mistakes, such as treating the payer, the insured person and the nominee as one record.",
         points: [
           {
@@ -178,6 +185,7 @@ export const MODULES: Module[] = [
       {
         id: "journey",
         title: "Quote to policy journey",
+        diagram: "quote",
         intro: "This is the backbone of most insurance IT work. Practise drawing it from memory, then add the system and the owner at each step.",
         points: [
           {
@@ -200,6 +208,7 @@ export const MODULES: Module[] = [
       {
         id: "servicing",
         title: "Servicing: endorsements, renewals, cancellations",
+        diagram: "lifecycle",
         intro: "After issuance, changes, renewals and cancellations create most of the service volume. Each can change premium, documents and tax.",
         points: [
           {
@@ -227,6 +236,7 @@ export const MODULES: Module[] = [
       {
         id: "claims",
         title: "Claims lifecycle",
+        diagram: "motor-claim",
         intro: "Claims are where the customer finds out what the policy is worth. They also carry most of the fraud, complaints and regulatory scrutiny.",
         points: [
           {
@@ -259,6 +269,7 @@ export const MODULES: Module[] = [
       {
         id: "systems",
         title: "Systems you will work on",
+        diagram: "systems",
         intro: "Job descriptions name these systems. Know what each one does and how data flows between them.",
         points: [
           {
@@ -323,6 +334,7 @@ export const MODULES: Module[] = [
       {
         id: "premium",
         title: "Premium build-up (in order)",
+        diagram: "premium",
         intro: "This is the order a rating engine follows. Work through it once by hand, then compare each step with the premium slip in the car calculator.",
         points: [
           {
@@ -531,6 +543,7 @@ export const MODULES: Module[] = [
       {
         id: "health-claims",
         title: "Claims and ecosystem",
+        diagram: "cashless",
         intro: "Most health complaints are about claims, so a lot of health BA work is too.",
         points: [
           {
@@ -659,6 +672,7 @@ export const MODULES: Module[] = [
       {
         id: "re",
         title: "Reinsurance",
+        diagram: "reinsurance",
         intro: "Insurers buy insurance too. Reinsurance spreads large losses and lets an insurer write more business than its own capital would allow.",
         points: [
           {
@@ -851,6 +865,7 @@ export const MODULES: Module[] = [
       {
         id: "artefacts",
         title: "Artefacts",
+        diagram: "data-model",
         intro: "The documents you will write. Prepare a sample of each to talk through in interviews.",
         points: [
           {
@@ -923,22 +938,252 @@ export const MODULES: Module[] = [
   },
 ];
 
+/** A link to a calculator or a filtered set of interview questions */
+export type PractiseLink = { label: string; calc?: ProductId; interview?: Category };
+
 export interface Week {
   week: number;
   focus: string;
-  use: string;
+  /** What you will be able to do by the end of the week */
+  goal: string;
+  /** [module id, topic id] pairs to study, in order */
+  topics: [string, string][];
+  /** Day-by-day or step-by-step activities */
+  tasks: string[];
+  practise: PractiseLink[];
   output: string;
+  /** How to produce the output */
+  outputHow: string;
+  /** Questions to answer out loud before moving on */
+  check: string[];
 }
 
 export const STUDY_PLAN: Week[] = [
-  { week: 1, focus: "Fundamentals, principles, segments, parties", use: "Module 1; glossary", output: "One-page glossary in your own words" },
-  { week: 2, focus: "Private car and two-wheeler rating", use: "Module 3; car and two-wheeler calculators", output: "Hand-calculated quote matching the calculator" },
-  { week: 3, focus: "Commercial vehicle rating and underwriting", use: "Module 3; commercial vehicle calculator", output: "Decision table for one vehicle class" },
-  { week: 4, focus: "Motor claims, endorsements, renewals", use: "Module 2; insurers' claim pages", output: "End-to-end motor claims process map" },
-  { week: 5, focus: "Health products, underwriting, claims", use: "Module 4; health calculator", output: "STP/NSTP decision table and cashless flow with SLA timers" },
-  { week: 6, focus: "Regulation, GST, tax, DPDP, Bima Sugam", use: "Module 7", output: "Impact analysis of the September 2025 GST change" },
-  { week: 7, focus: "Life insurance and commercial lines", use: "Modules 5 and 6; term life calculator", output: "Comparison table of term, endowment and ULIP" },
-  { week: 8, focus: "Trends, KPIs, mock interviews", use: "Modules 8–9; Interview tab", output: "Five STAR stories and one case study for your CV" },
+  {
+    week: 1,
+    focus: "Fundamentals, principles, segments, parties",
+    goal: "Explain what insurance is, the six principles with an example each, who does what in the industry and the key business ratios.",
+    topics: [
+      ["fundamentals", "principles"],
+      ["fundamentals", "segments"],
+      ["fundamentals", "parties"],
+      ["fundamentals", "metrics"],
+    ],
+    tasks: [
+      "Days 1–2: read Six core principles. For each one, write your own example from motor, health or life.",
+      "Day 3: read Life, general and standalone health, then list three insurers of each kind you have heard of.",
+      "Day 4: read Parties in the value chain. Draw a diagram of who pays whom in a motor claim at a network garage.",
+      "Day 5: read Business metrics and work out a loss ratio and a combined ratio from made-up numbers.",
+      "Weekend: read the glossary and tick every point you can explain without looking.",
+    ],
+    practise: [{ label: "Fundamentals interview questions", interview: "Fundamentals" }],
+    output: "One-page glossary in your own words",
+    outputHow: "Pick the 20 terms you found hardest. Write a one-line definition and a one-line example for each, without copying from the site.",
+    check: [
+      "Why does indemnity not apply to life insurance?",
+      "What is the difference between the proposer, the insured and the nominee?",
+      "A combined ratio of 104% means what, and how can the insurer still make a profit?",
+    ],
+  },
+  {
+    week: 2,
+    focus: "Private car and two-wheeler rating",
+    goal: "Calculate a private car and a two-wheeler premium by hand, step by step, and match the calculator to the rupee.",
+    topics: [
+      ["motor", "contracts"],
+      ["motor", "premium"],
+    ],
+    tasks: [
+      "Day 1: read Products, contracts and variants. Write down which variant each of these needs: a new car, a 2-year-old car, a car with long-term TP still running.",
+      "Days 2–3: read Premium build-up and the third-party rate table under it. Follow the eight steps with the default car quote.",
+      "Day 4: open the car calculator and change one input at a time (city, NCB, age, add-ons). Note which line of the premium slip moves.",
+      "Day 5: repeat with the two-wheeler calculator and compare the two slips.",
+      "Weekend: build your own quote on paper, then check it in the calculator.",
+    ],
+    practise: [
+      { label: "Car calculator", calc: "car" },
+      { label: "Two-wheeler calculator", calc: "tw" },
+      { label: "Motor interview questions", interview: "Motor" },
+    ],
+    output: "Hand-calculated quote matching the calculator",
+    outputHow: "Choose a car, city, age and NCB. Work out the IDV, OD, NCB, TP, CPA, add-ons and GST in a spreadsheet, then compare with the calculator and explain any difference.",
+    check: [
+      "Why is NCB applied to OD but never to TP?",
+      "A 27-month-old car's ex-showroom price is ₹10 lakh. What is its IDV, and what range can the customer choose?",
+      "When does a customer buy standalone OD instead of a comprehensive policy?",
+    ],
+  },
+  {
+    week: 3,
+    focus: "Commercial vehicle rating and underwriting",
+    goal: "Explain how commercial vehicles are classed and rated, and when a motor quote needs an underwriter or inspection.",
+    topics: [
+      ["motor", "contracts"],
+      ["motor", "uw"],
+      ["motor", "motor-trends"],
+    ],
+    tasks: [
+      "Day 1: re-read the products point in Products, contracts and variants and list the GCV, PCV and miscellaneous classes.",
+      "Day 2: in the commercial vehicle calculator, compare a goods vehicle with a taxi. Note the two GST lines on the goods vehicle.",
+      "Day 3: read Underwriting and inspection and list every referral and inspection trigger.",
+      "Day 4: read What is new in motor and summarise each change in one sentence.",
+      "Day 5: turn the referral triggers into a decision table.",
+    ],
+    practise: [
+      { label: "Commercial vehicle calculator", calc: "cv" },
+      { label: "Scenario interview questions", interview: "Scenarios" },
+    ],
+    output: "Decision table for one vehicle class",
+    outputHow: "Pick goods vehicles or taxis. List the conditions (age, IDV change, NCB proof, break-in, discount asked) as columns and the outcome (STP, refer, inspect, decline) as the last column, one row per combination.",
+    check: [
+      "Why does a goods vehicle invoice show both 18% and 5% GST?",
+      "A policy expired 100 days ago. What happens to the NCB and what checks are needed?",
+      "What does Pay As You Drive change in the premium?",
+    ],
+  },
+  {
+    week: 4,
+    focus: "Motor claims, endorsements, renewals",
+    goal: "Walk through the policy lifecycle from quote to claim, including mid-term changes, renewals and the systems involved.",
+    topics: [
+      ["value-chain", "journey"],
+      ["value-chain", "servicing"],
+      ["value-chain", "claims"],
+      ["value-chain", "systems"],
+    ],
+    tasks: [
+      "Day 1: read Quote to policy journey and redraw it with the system used at each step.",
+      "Day 2: read Servicing and classify ten made-up changes as nil, premium-bearing or cancellation.",
+      "Day 3: read Claims lifecycle. Follow one OD claim and one theft claim from FNOL to settlement.",
+      "Day 4: read Systems you will work on and match each system to the steps it supports.",
+      "Day 5: read a real insurer's motor claim page and compare its steps with yours.",
+    ],
+    practise: [{ label: "BA craft interview questions", interview: "BA craft" }],
+    output: "End-to-end motor claims process map",
+    outputHow: "Draw a swimlane map with lanes for customer, garage, surveyor, insurer and the TP insurer. Mark the decision points (cashless or reimbursement, repair or total loss) and the documents needed at each step.",
+    check: [
+      "What must happen in billing, commission and GST when a policy is cancelled?",
+      "When is a car treated as a total loss?",
+      "How does subrogation show up in a motor claim?",
+    ],
+  },
+  {
+    week: 5,
+    focus: "Health products, underwriting, claims",
+    goal: "Explain the main health products, how they are priced and underwritten, the current IRDAI rules and the cashless claim flow.",
+    topics: [
+      ["health", "products"],
+      ["health", "pricing"],
+      ["health", "rules"],
+      ["health", "health-claims"],
+    ],
+    tasks: [
+      "Day 1: read Plans and products. Work out who pays what in the super top-up example with your own numbers.",
+      "Day 2: read Premium drivers and underwriting. In the health calculator, change age, zone and sum insured and record the premiums.",
+      "Day 3: read Current IRDAI rules and write each rule as a system requirement.",
+      "Day 4: read Claims and ecosystem and draw the cashless flow with its time limits.",
+      "Day 5: write the STP rules as a decision table.",
+    ],
+    practise: [
+      { label: "Health calculator", calc: "health" },
+      { label: "Health interview questions", interview: "Health" },
+    ],
+    output: "STP/NSTP decision table and cashless flow with SLA timers",
+    outputHow: "Table 1: conditions (age, sum insured, pre-existing disease, BMI) and the outcome, STP or medicals. Diagram 2: the cashless flow from admission to discharge, with the 1-hour and 3-hour clocks marked.",
+    check: [
+      "What is the difference between a top-up and a super top-up?",
+      "After how many years can an insurer no longer reject a claim for non-disclosure, and what is the exception?",
+      "What happens if discharge authorisation takes longer than 3 hours?",
+    ],
+  },
+  {
+    week: 6,
+    focus: "Regulation, GST, tax, DPDP, Bima Sugam",
+    goal: "Summarise the 2025–26 legal, tax and digital changes and explain what each one means for insurers' systems.",
+    topics: [
+      ["regulation", "law"],
+      ["regulation", "tax"],
+      ["regulation", "digital"],
+      ["regulation", "data"],
+      ["ba-craft", "impact"],
+    ],
+    tasks: [
+      "Day 1: read Law and regulator and summarise the 2025 Act in five bullet points.",
+      "Day 2: read GST and income tax. Compare the GST lines for a car, a health policy and a goods vehicle in the calculators.",
+      "Day 3: read Digital public infrastructure and explain Bima Sugam to a friend in two minutes.",
+      "Day 4: read Data protection and accounting and list three systems DPDP affects.",
+      "Day 5: read Regulatory change impact analysis, then apply it to the GST change.",
+    ],
+    practise: [
+      { label: "Regulation interview questions", interview: "Regulation 2025–26" },
+      { label: "Tax and GST interview questions", interview: "Tax and GST" },
+    ],
+    output: "Impact analysis of the September 2025 GST change",
+    outputHow: "List the products affected, the old and new GST rate for each, then every system, document and report that must change. Add the effective date and how policies already issued are treated.",
+    check: [
+      "Which policies went to 0% GST in September 2025, and which stayed at 18%?",
+      "What does section 126 replace, and who can claim it?",
+      "Why should rates be effective-dated rather than overwritten?",
+    ],
+  },
+  {
+    week: 7,
+    focus: "Life insurance and commercial lines",
+    goal: "Hold a confident conversation about life products and operations, commercial lines and reinsurance.",
+    topics: [
+      ["life", "life-products"],
+      ["life", "life-ops"],
+      ["commercial", "lines"],
+      ["commercial", "re"],
+    ],
+    tasks: [
+      "Day 1: read Products (life) and note who each product suits.",
+      "Day 2: read Operations and terms. In the term life calculator, compare a smoker and a non-smoker.",
+      "Day 3: read Main commercial lines and match each line to a type of business.",
+      "Day 4: read Reinsurance and redo the quota share and excess of loss examples with your own numbers.",
+      "Day 5: build the comparison table.",
+    ],
+    practise: [
+      { label: "Term life calculator", calc: "life" },
+      { label: "Life and commercial interview questions", interview: "Life and commercial" },
+    ],
+    output: "Comparison table of term, endowment and ULIP",
+    outputHow: "Columns: term, endowment, ULIP. Rows: purpose, death benefit, maturity benefit, guarantees, charges, lock-in, who it suits, typical premium for the same cover.",
+    check: [
+      "Why is term insurance the cheapest cover per rupee?",
+      "What is the difference between a paid-up and a lapsed policy?",
+      "When would an insurer use facultative rather than treaty reinsurance?",
+    ],
+  },
+  {
+    week: 8,
+    focus: "Trends, KPIs, mock interviews",
+    goal: "Talk about where insurance is heading, the BA documents you would write and your own experience in insurance terms.",
+    topics: [
+      ["trends", "ai"],
+      ["trends", "distribution"],
+      ["ba-craft", "artefacts"],
+      ["ba-craft", "kpis"],
+    ],
+    tasks: [
+      "Day 1: read AI across the chain and pick one use case you could lead as a BA.",
+      "Day 2: read Distribution and products and find one real example of embedded insurance.",
+      "Day 3: read Artefacts and write one user story with Gherkin acceptance criteria for a motor rule.",
+      "Day 4: read KPIs to talk about and attach a KPI to each of your past projects.",
+      "Days 5–7: practise interview questions out loud, timing yourself to two minutes each.",
+    ],
+    practise: [
+      { label: "Technology and AI interview questions", interview: "Technology and AI" },
+      { label: "Behavioural interview questions", interview: "Behavioural" },
+    ],
+    output: "Five STAR stories and one case study for your CV",
+    outputHow: "Write five stories as Situation, Task, Action, Result, each ending with a number (KPI). For the case study, pick one insurance problem from this site and describe how you would analyse and solve it.",
+    check: [
+      "Which AI guardrails would you insist on for automatic claim settlement?",
+      "How would you test a rating engine before go-live?",
+      "Which KPI would you use to show the value of raising the STP rate?",
+    ],
+  },
 ];
 
 export const GLOSSARY: [string, string][] = [

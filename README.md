@@ -21,10 +21,10 @@ Nine modules with 117 points to tick off as you master them. Every point has a p
 | 8 | Technology and trends | AI in claims and underwriting, embedded insurance, usage-based and parametric covers |
 | 9 | The BA's craft | BRDs, user stories, decision tables, UAT, KPIs and regulatory impact analysis |
 
-There is also an **8-week study plan**, a **glossary** and a list of **sources**.
+There are also **9 reference diagrams** (quote-to-policy flow, parties and money flows, premium waterfall, policy lifecycle, motor and health claim swimlanes, reinsurance layers, system context and data model), an **8-week study plan** whose topics link straight to the lessons, a **glossary** and a list of **sources**.
 
 ### Interview prep
-58 questions with model answers. You can filter them by category and level, search them, pick one at random, and mark the ones you've practised.
+89 questions from core to advanced, in 13 categories including calculations, whiteboard diagrams, SQL, scenarios and behavioural questions. Many have worked examples or sample answers, and the diagram questions link to the reference diagrams. You can filter by category and level, search, pick one at random, and mark the ones you've practised.
 
 ### Calculators
 Premium calculators for **private car, two-wheeler, commercial vehicle (goods, passenger, miscellaneous), health and term life**. Each one:
@@ -48,7 +48,19 @@ Example: the default private car quote (Mumbai, 1,197 cc, 27 months old, 25% NCB
 
 Each line is rounded to the nearest rupee, so the lines may not add up exactly to the totals.
 
-Your progress, calculator inputs and saved scenarios stay in your own browser (localStorage). There is no sign-up and no server.
+### Whiteboard
+A drawing canvas for practising the diagrams interviewers ask for:
+
+- **Open a blank whiteboard** button: a full-screen, empty canvas (Esc or "Exit full screen" to leave; Undo brings back your previous drawing)
+- **Insurance shapes:** person, organisation, hospital, vehicle, payment, cover
+- **Flowchart shapes:** start / end, process step, decision, document, system / data, note
+- **BPMN shapes:** pool with swimlanes, start / message / timer / end events, task, exclusive and parallel gateways, data object
+- **Connectors:** sequence flow and message flow, with labels such as Yes / No
+- **Templates:** insurance parties and money flows, BPMN swimlanes for a cashless health claim and a motor own damage claim, a health STP flowchart, a blank swimlane and a blank canvas
+- Drag to move, resize, duplicate, undo and redo, zoom, and download as PNG or SVG
+- A "BPMN in five minutes" guide explaining each symbol, with tips for drawing in interviews
+
+Your progress, calculator inputs, saved scenarios and whiteboard drawing stay in your own browser (localStorage). There is no sign-up and no server.
 
 ## Run it locally
 
@@ -95,9 +107,11 @@ npm run dev        # http://localhost:5173
 src/
   App.tsx                 masthead and tabs (#learn, #interview, #calculators)
   components/
-    Learn.tsx             modules, progress, study plan, glossary
+    Learn.tsx             modules, diagrams, study plan, glossary
+    Diagrams.tsx          reference diagrams (inline SVG)
     Interview.tsx         question bank
     Calculators.tsx       forms, premium slip, scenarios
+    Whiteboard.tsx        drawing canvas, palette, export
   data/
     learn.ts              all learning content and sources
     interview.ts          all interview questions
@@ -108,6 +122,8 @@ src/
     life.ts               term life model
     products.ts           product registry and default inputs
     totals.test.ts        regression tests
+  whiteboard/
+    model.ts              shapes, BPMN symbols and templates
 ```
 
 ## Deploy

@@ -3,11 +3,13 @@ import { AS_OF } from "./data/learn";
 import Learn from "./components/Learn";
 import Interview from "./components/Interview";
 import Calculators from "./components/Calculators";
+import Whiteboard from "./components/Whiteboard";
 
-const TABS: { id: TabId; label: string; hint: string }[] = [
+const TABS: { id: TabId; label: string; short?: string; hint: string }[] = [
   { id: "learn", label: "Learn", hint: "Topics and study plan" },
-  { id: "interview", label: "Interview prep", hint: "Questions with model answers" },
+  { id: "interview", label: "Interview prep", short: "Interview", hint: "Questions with model answers" },
   { id: "calculators", label: "Calculators", hint: "Premium rating, step by step" },
+  { id: "whiteboard", label: "Whiteboard", hint: "Draw flows and BPMN swimlanes" },
 ];
 
 export default function App() {
@@ -44,7 +46,10 @@ export default function App() {
                 go(t.id);
               }}
             >
-              <span>{t.label}</span>
+              <span>
+                <span className="tab-long">{t.label}</span>
+                <span className="tab-short">{t.short ?? t.label}</span>
+              </span>
               <small>{t.hint}</small>
             </a>
           ))}
@@ -52,9 +57,12 @@ export default function App() {
       </header>
 
       <main className="wrap main">
-        {tab === "learn" && <Learn onOpenCalc={(p) => go("calculators", p)} />}
-        {tab === "interview" && <Interview onOpenCalc={(p) => go("calculators", p)} />}
+        {tab === "learn" && <Learn focus={sub} onOpenCalc={(p) => go("calculators", p)} onOpenInterview={(c) => go("interview", encodeURIComponent(c))} onOpenWhiteboard={() => go("whiteboard", "blank")} />}
+        {tab === "interview" && (
+          <Interview key={sub} initialCategory={sub} onOpenCalc={(p) => go("calculators", p)} onOpenDiagram={(d) => go("learn", `d-${d}`)} />
+        )}
         {tab === "calculators" && <Calculators product={sub} onProduct={(p) => go("calculators", p)} />}
+        {tab === "whiteboard" && <Whiteboard start={sub} onStarted={() => window.location.replace("#whiteboard")} />}
       </main>
 
       <footer className="wrap foot">

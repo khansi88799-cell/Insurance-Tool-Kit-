@@ -4,11 +4,12 @@ Project context for Claude Code. `HANDOVER.md` (kept local, git-ignored) has the
 
 ## What this is
 
-A static study website for a Business Analyst moving into **Indian insurance**. Three tabs:
+A static study website for learning **Indian insurance**, aimed at Business Analysts. Four tabs:
 
 1. **Learn** (`#learn`): 9 modules of points to tick off, 8-week plan, glossary, sources.
-2. **Interview prep** (`#interview`): 58 questions with model answers, filters, practised tracker.
+2. **Interview prep** (`#interview`, `#interview/<category>`): 89 questions with model answers, worked examples, diagram links, filters, practised tracker.
 3. **Calculators** (`#calculators/<car|tw|cv|health|life>`): step-by-step premium rating with formulas, rule flags and scenario comparison.
+4. **Whiteboard** (`#whiteboard`): SVG drawing canvas with flowchart and BPMN shapes, swimlane pools, connectors, templates, undo, PNG/SVG export. Board saved in localStorage key `ibd-whiteboard`; shapes and templates in `src/whiteboard/model.ts`.
 
 Rules and rates are **as of 26 October 2026** (`AS_OF` in `src/data/learn.ts`).
 
@@ -23,7 +24,7 @@ Rules and rates are **as of 26 October 2026** (`AS_OF` in `src/data/learn.ts`).
 ```
 src/App.tsx              masthead + tabs, hash routing via useHashTab()
 src/hooks.ts             useStoredState (localStorage with try/catch), useHashTab
-src/components/          Learn.tsx, Interview.tsx, Calculators.tsx
+src/components/          Learn.tsx, Interview.tsx, Calculators.tsx, Diagrams.tsx (inline SVG reference diagrams; #learn/d-<id> scrolls to one)
 src/data/learn.ts        MODULES, STUDY_PLAN, GLOSSARY, SOURCES, AS_OF  ← content lives here
 src/data/interview.ts    QUESTIONS, CATEGORIES                        ← content lives here
 src/calc/types.ts        State, Field, Section, Result, Product types
