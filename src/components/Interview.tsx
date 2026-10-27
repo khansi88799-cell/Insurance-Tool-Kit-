@@ -2,32 +2,14 @@ import { useMemo, useState } from "react";
 import { CATEGORIES, QUESTIONS, type Category, type Question } from "../data/interview";
 import { useStoredState } from "../hooks";
 import type { ProductId } from "../calc/types";
-import { DIAGRAM_TITLE, type DiagramId } from "./Diagrams";
+import { Link } from "../router";
+import { paths } from "../routes";
+import { DIAGRAM_TITLE } from "./Diagrams";
 
 type Level = Question["level"] | "All";
 
-/** Category from the URL, e.g. #interview/Motor; anything unknown shows all */
-function categoryFrom(sub: string): Category | "All" {
-  let c = sub;
-  try {
-    c = decodeURIComponent(sub);
-  } catch {
-    /* malformed hash */
-  }
-  return CATEGORIES.includes(c as Category) ? (c as Category) : "All";
-}
-
-export default function Interview({
-  onOpenCalc,
-  onOpenDiagram,
-  initialCategory = "",
-}: {
-  onOpenCalc: (p: ProductId) => void;
-  onOpenDiagram: (d: DiagramId) => void;
-  initialCategory?: string;
-}) {
+export default function Interview({ category: cat }: { category: Category | "All" }) {
   const [query, setQuery] = useState("");
-  const [cat, setCat] = useState<Category | "All">(() => categoryFrom(initialCategory));
   const [level, setLevel] = useState<Level>("All");
   const [showAll, setShowAll] = useState(false);
   const [open, setOpen] = useState<Record<string, boolean>>({});
@@ -61,7 +43,7 @@ export default function Interview({
   return (
     <div className="interview">
       <section className="intro">
-        <h1>Interview questions, updated for 2026 rules</h1>
+        <h1>{cat === "All" ? "Insurance interview questions, updated for 2026 rules" : `${cat} interview questions for insurance roles`}</h1>
         <p>
           {QUESTIONS.length} questions from core to advanced: concepts, calculations, whiteboard diagrams, SQL, scenarios and behavioural. Answer out loud first,
           then reveal the model answer and example. Mark each one practised when you can answer it without looking.
@@ -90,16 +72,16 @@ export default function Interview({
         </span>
       </div>
 
-      <div className="chips" role="group" aria-label="Category">
-        <button type="button" className="chip" aria-pressed={cat === "All"} onClick={() => setCat("All")}>
+      <nav className="chips" aria-label="Category">
+        <Link to={paths.interview()} className="chip" aria-current={cat === "All" ? "page" : undefined}>
           All <span>{QUESTIONS.length}</span>
-        </button>
+        </Link>
         {CATEGORIES.map((c) => (
-          <button key={c} type="button" className="chip" aria-pressed={cat === c} onClick={() => setCat(c)}>
+          <Link key={c} to={paths.interview(c)} className="chip" aria-current={cat === c ? "page" : undefined}>
             {c} <span>{counts[c]}</span>
-          </button>
+          </Link>
         ))}
-      </div>
+      </nav>
 
       {list.length === 0 && <p className="muted">No questions match. Clear the search or pick another category.</p>}
 
@@ -113,36 +95,34 @@ export default function Interview({
                 <span className={`qlevel ${x.level.toLowerCase()}`}>{x.level}</span>
               </div>
               <h3>{x.q}</h3>
-              {isOpen ? (
-                <>
-                  <ul className="answer">
-                    {x.a.map((a) => (
-                      <li key={a}>{a}</li>
-                    ))}
-                  </ul>
-                  {x.ex && (
-                    <div className={`example${x.cat === "Data and SQL" ? " code" : ""}`}>
-                      <b>{x.cat === "Data and SQL" ? "Example query" : "Example"}</b>
-                      {x.ex}
-                    </div>
-                  )}
-                </>
-              ) : null}
+              <div className="qbody" id={`a-${x.id}`} hidden={!isOpen}>
+                <ul className="answer">
+                  {x.a.map((a) => (
+                    <li key={a}>{a}</li>
+                  ))}
+                </ul>
+                {x.ex && (
+                  <div className={`example${x.cat === "Data and SQL" ? " code" : ""}`}>
+                    <b>{x.cat === "Data and SQL" ? "Example query" : "Example"}</b>
+                    {x.ex}
+                  </div>
+                )}
+              </div>
               <div className="qactions">
                 {!showAll && (
-                  <button type="button" className="btn ghost" aria-expanded={!!isOpen} onClick={() => setOpen((o) => ({ ...o, [x.id]: !o[x.id] }))}>
+                  <button type="button" className="btn ghost" aria-expanded={!!isOpen} aria-controls={`a-${x.id}`} onClick={() => setOpen((o) => ({ ...o, [x.id]: !o[x.id] }))}>
                     {isOpen ? "Hide answer" : "Reveal answer"}
                   </button>
                 )}
                 {x.diagram && (
-                  <button type="button" className="btn ghost" onClick={() => onOpenDiagram(x.diagram as DiagramId)}>
+                  <Link className="btn ghost" to={paths.diagram(x.diagram)}>
                     See the diagram: {DIAGRAM_TITLE[x.diagram]} →
-                  </button>
+                  </Link>
                 )}
                 {x.try && (
-                  <button type="button" className="btn ghost" onClick={() => onOpenCalc(x.try as ProductId)}>
+                  <Link className="btn ghost" to={paths.calc(x.try as ProductId)}>
                     Try it in the calculator →
-                  </button>
+                  </Link>
                 )}
                 <label className="chk">
                   <input type="checkbox" checked={!!practised[x.id]} onChange={() => setPractised((p) => ({ ...p, [x.id]: !p[x.id] }))} /> Practised

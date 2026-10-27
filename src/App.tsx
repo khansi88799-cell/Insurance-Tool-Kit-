@@ -1,25 +1,44 @@
-import { useHashTab, type TabId } from "./hooks";
+import { useEffect } from "react";
 import { AS_OF } from "./data/learn";
+import { Link, useRouter } from "./router";
+import { SITE_URL, parseRoute, paths, routeMeta, type TabId } from "./routes";
 import Learn from "./components/Learn";
 import Interview from "./components/Interview";
 import Calculators from "./components/Calculators";
 import Whiteboard from "./components/Whiteboard";
 
-const TABS: { id: TabId; label: string; short?: string; hint: string }[] = [
-  { id: "learn", label: "Learn", hint: "Topics and study plan" },
-  { id: "interview", label: "Interview prep", short: "Interview", hint: "Questions with model answers" },
-  { id: "calculators", label: "Calculators", hint: "Premium rating, step by step" },
-  { id: "whiteboard", label: "Whiteboard", hint: "Draw flows and BPMN swimlanes" },
+const TABS: { id: TabId; to: string; label: string; short?: string; hint: string }[] = [
+  { id: "learn", to: paths.home, label: "Learn", hint: "Topics and study plan" },
+  { id: "interview", to: paths.interview(), label: "Interview prep", short: "Interview", hint: "Questions with model answers" },
+  { id: "calculators", to: paths.calculators, label: "Calculators", hint: "Premium rating, step by step" },
+  { id: "whiteboard", to: paths.whiteboard, label: "Whiteboard", hint: "Draw flows and BPMN swimlanes" },
 ];
 
+/** Keep the title, description and share tags in step with client-side navigation */
+function setHead(title: string, description: string, url: string) {
+  document.title = title;
+  const set = (sel: string, attr: string, value: string) => document.head.querySelector(sel)?.setAttribute(attr, value);
+  set('meta[name="description"]', "content", description);
+  set('link[rel="canonical"]', "href", url);
+  set('meta[property="og:title"]', "content", title);
+  set('meta[property="og:description"]', "content", description);
+  set('meta[property="og:url"]', "content", url);
+}
+
 export default function App() {
-  const [tab, sub, go] = useHashTab();
+  const { loc, navigate } = useRouter();
+  const route = parseRoute(loc.pathname);
+  const meta = routeMeta(route, loc.pathname);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") setHead(meta.title, meta.description, SITE_URL + meta.canonical);
+  }, [meta.title, meta.description, meta.canonical]);
 
   return (
     <div className="app">
       <header className="masthead">
         <div className="wrap masthead-inner">
-          <a className="brand" href="#learn" onClick={(e) => (e.preventDefault(), go("learn"))}>
+          <Link className="brand" to={paths.home}>
             <svg viewBox="0 0 32 32" aria-hidden="true">
               <rect width="32" height="32" rx="7" />
               <path d="M16 6l9 3.5v6.2c0 5.4-3.7 9.3-9 10.8-5.3-1.5-9-5.4-9-10.8V9.5z" />
@@ -29,40 +48,48 @@ export default function App() {
               <strong>Insurance Learning Desk</strong>
               <small>Indian insurance guide, from beginner to pro</small>
             </span>
-          </a>
+          </Link>
           <span className="asof">
             Rules as of <b>{AS_OF}</b>
           </span>
         </div>
         <nav className="wrap tabs" aria-label="Sections">
           {TABS.map((t) => (
-            <a
-              key={t.id}
-              href={`#${t.id}`}
-              className="tab"
-              aria-current={tab === t.id ? "page" : undefined}
-              onClick={(e) => {
-                e.preventDefault();
-                go(t.id);
-              }}
-            >
+            <Link key={t.id} to={t.to} className="tab" aria-current={route.tab === t.id ? "page" : undefined}>
               <span>
                 <span className="tab-long">{t.label}</span>
                 <span className="tab-short">{t.short ?? t.label}</span>
               </span>
               <small>{t.hint}</small>
-            </a>
+            </Link>
           ))}
         </nav>
       </header>
 
       <main className="wrap main">
-        {tab === "learn" && <Learn focus={sub} onOpenCalc={(p) => go("calculators", p)} onOpenInterview={(c) => go("interview", encodeURIComponent(c))} onOpenWhiteboard={() => go("whiteboard", "blank")} />}
-        {tab === "interview" && (
-          <Interview key={sub} initialCategory={sub} onOpenCalc={(p) => go("calculators", p)} onOpenDiagram={(d) => go("learn", `d-${d}`)} />
+        {route.tab === "learn" && <Learn page={route.page} moduleId={route.module} />}
+        {route.tab === "interview" && <Interview category={route.category} />}
+        {route.tab === "calculators" && <Calculators product={route.product} />}
+        {route.tab === "whiteboard" && (
+          <Whiteboard start={new URLSearchParams(loc.search).get("start") ?? ""} onStarted={() => navigate(paths.whiteboard, { replace: true, scroll: false })} />
         )}
-        {tab === "calculators" && <Calculators product={sub} onProduct={(p) => go("calculators", p)} />}
-        {tab === "whiteboard" && <Whiteboard start={sub} onStarted={() => window.location.replace("#whiteboard")} />}
+        {route.tab === "notfound" && (
+          <section className="intro not-found">
+            <h1>Page not found</h1>
+            <p>This page does not exist or has moved. Try one of these instead.</p>
+            <p className="not-found-links">
+              <Link className="btn primary" to={paths.home}>
+                Learn home
+              </Link>
+              <Link className="btn" to={paths.interview()}>
+                Interview questions
+              </Link>
+              <Link className="btn" to={paths.calculators}>
+                Calculators
+              </Link>
+            </p>
+          </section>
+        )}
       </main>
 
       <footer className="wrap foot">
@@ -74,3 +101,4 @@ export default function App() {
     </div>
   );
 }
+

@@ -366,7 +366,7 @@ export default function Whiteboard({ start = "", onStarted }: { start?: string; 
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ left: 0, top: 0 }));
   }, [board, commit]);
 
-  // #whiteboard/blank opens a blank board straight away
+  // /whiteboard?start=blank opens a blank board straight away
   const started = useRef(false);
   useEffect(() => {
     if (start !== "blank" || started.current) return;

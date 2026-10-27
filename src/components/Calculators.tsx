@@ -3,6 +3,16 @@ import { PRODUCTS, PRODUCT_ORDER, defaultState } from "../calc/products";
 import type { Field, ProductId, Result, Section, State } from "../calc/types";
 import { inr, inr2 } from "../calc/util";
 import { useStoredState } from "../hooks";
+import { Link } from "../router";
+import { paths } from "../routes";
+
+const CALC_H1: Record<ProductId, string> = {
+  car: "Car insurance premium calculator",
+  tw: "Two-wheeler insurance premium calculator",
+  cv: "Commercial vehicle insurance premium calculator",
+  health: "Health insurance premium calculator",
+  life: "Term life insurance premium calculator",
+};
 
 const SECTION_NAMES: Record<string, string> = {
   OD: "Own damage",
@@ -78,8 +88,7 @@ function FieldControl({ f, st, pid, set }: { f: Field; st: State; pid: string; s
   );
 }
 
-export default function Calculators({ product, onProduct }: { product: string; onProduct: (p: ProductId) => void }) {
-  const pid: ProductId = (PRODUCT_ORDER as string[]).includes(product) ? (product as ProductId) : "car";
+export default function Calculators({ product: pid }: { product: ProductId }) {
   const P = PRODUCTS[pid];
   const sections = useMemo(() => P.sections(), [P]);
   const [allStates, setAllStates] = useStoredState<Partial<Record<ProductId, State>>>("ibd-calc-state", {});
@@ -108,21 +117,21 @@ export default function Calculators({ product, onProduct }: { product: string; o
   return (
     <div className="calcs">
       <section className="intro">
-        <h1>Premium calculators</h1>
+        <h1>{CALC_H1[pid]}</h1>
         <p>
           Change any condition and the premium slip updates with every formula and rule flag. Motor uses the 2022 TP Rules and the erstwhile Indian Motor
           Tariff for OD; health and term life use editable illustrative models.
         </p>
       </section>
 
-      <div className="subtabs" role="tablist" aria-label="Product">
+      <nav className="subtabs" aria-label="Product">
         {PRODUCT_ORDER.map((id) => (
-          <button key={id} type="button" role="tab" aria-selected={pid === id} onClick={() => onProduct(id)}>
+          <Link key={id} to={paths.calc(id)} aria-current={pid === id ? "page" : undefined}>
             {PRODUCTS[id].name}
             <span className={`tag ${PRODUCTS[id].model ? "model" : "tariff"}`}>{PRODUCTS[id].model ? "model" : "tariff"}</span>
-          </button>
+          </Link>
         ))}
-      </div>
+      </nav>
 
       <div className="calc-grid">
         <form className="form" onSubmit={(e) => e.preventDefault()} autoComplete="off">

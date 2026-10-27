@@ -64,6 +64,21 @@ A drawing canvas for practising the diagrams interviewers ask for:
 
 Your progress, calculator inputs, saved scenarios and whiteboard drawing stay in your own browser (localStorage). There is no sign-up and no server.
 
+## Pages and search
+
+Every section has its own address, and each one is built as a ready-made HTML page so search engines and link previews (WhatsApp, LinkedIn, X) can read it:
+
+| Page | Address |
+|---|---|
+| Learn home | `/` |
+| Modules | `/learn/fundamentals`, `/learn/motor`, `/learn/health` … |
+| Diagrams, study plan, glossary | `/learn/diagrams`, `/learn/study-plan`, `/learn/glossary` |
+| Interview questions | `/interview`, `/interview/motor`, `/interview/data-and-sql` … |
+| Calculators | `/calculators/car-insurance`, `/calculators/two-wheeler-insurance`, `/calculators/commercial-vehicle-insurance`, `/calculators/health-insurance`, `/calculators/term-life-insurance` |
+| Whiteboard | `/whiteboard` (`/whiteboard?start=blank` opens a blank board) |
+
+Each page has its own title, description, canonical link and share preview (`public/og-image.png`). The build also writes `sitemap.xml`, `robots.txt` and a `404.html`. Old `#calculators/car`-style links redirect to the new addresses.
+
 ## Run it locally
 
 You need **Node.js 22 or newer** ([download](https://nodejs.org)).
@@ -80,12 +95,12 @@ npm run dev        # http://localhost:5173
 | `npm run dev` | Start the development server |
 | `npm test` | Run the calculator regression tests (Vitest) |
 | `npm run test:watch` | Re-run tests as you edit |
-| `npm run build` | Type-check and build the static site to `dist/` |
+| `npm run build` | Type-check, build the site and prerender every page, the sitemap and robots.txt into `dist/` |
 | `npm run preview` | Serve the built site at http://localhost:4173 |
 
 ## Tests
 
-`src/calc/totals.test.ts` checks every calculator against known totals, so a change to a rate table cannot silently change a premium:
+`src/routes.test.ts` checks that every page address works, has its own title and a description short enough for search results, and that old `#` links redirect. `src/calc/totals.test.ts` checks every calculator against known totals, so a change to a rate table cannot silently change a premium:
 
 | Product (default inputs) | Expected total |
 |---|---|
@@ -101,13 +116,20 @@ npm run dev        # http://localhost:5173
 - [Vite 8](https://vite.dev), [React 19](https://react.dev) and [TypeScript 7](https://www.typescriptlang.org) (strict)
 - Plain CSS with light and dark themes, no UI library, no backend
 - [Vitest](https://vitest.dev) for tests
+- Prerendered with React's own `renderToString` at build time (no extra libraries), so every page is static HTML
 - Static output in `dist/`, hosted on Cloudflare Pages
 
 ## Project structure
 
 ```
+scripts/
+  prerender.mjs           writes every page, sitemap.xml, robots.txt and 404.html into dist/
 src/
-  App.tsx                 masthead and tabs (#learn, #interview, #calculators)
+  App.tsx                 masthead, tabs and page head (title, description, share tags)
+  main.tsx                browser entry
+  entry-server.tsx        build-time renderer used by scripts/prerender.mjs
+  routes.ts               page addresses, titles, descriptions, SITE_URL
+  router.tsx              History API router and <Link>
   components/
     Learn.tsx             modules, diagrams, study plan, glossary
     Diagrams.tsx          reference diagrams (inline SVG)
@@ -141,6 +163,10 @@ Cloudflare Pages settings:
 | Build output directory | `dist` |
 | Environment variable | `NODE_VERSION` = `22` |
 
+**Analytics:** turn on Cloudflare Web Analytics in the Pages project (Metrics → Web Analytics → Enable). Cloudflare then adds its script when serving the site, so there is nothing in the code, no cookies and no consent banner needed.
+
+**Custom domain:** add it under the Pages project's Custom domains, then change `SITE_URL` in `src/routes.ts` so canonical links, share previews and the sitemap use it.
+
 `netlify.toml` is also kept in the repo, so the site can be deployed to Netlify with no extra setup if needed.
 
 ## Keeping it up to date
@@ -149,6 +175,7 @@ Cloudflare Pages settings:
 - **GST change?** Search for `GST` in `src/calc/motor.ts`, `health.ts` and `life.ts`.
 - **New learning point?** Add `{ t, d, ex }` (idea, explanation, example) to a topic in `src/data/learn.ts`. Add new points at the end of a topic, because saved progress is keyed by position.
 - **New interview question?** Add an object to `QUESTIONS` in `src/data/interview.ts`.
+- **New page?** Add its address to `parseRoute`, `routeMeta` and `allPaths` in `src/routes.ts`; it is then prerendered and listed in the sitemap.
 
 ## Accuracy notes
 

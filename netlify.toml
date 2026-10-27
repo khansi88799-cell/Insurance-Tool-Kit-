@@ -5,8 +5,5 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# Single-page app: send every route to index.html
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Every page is prerendered to its own HTML file (learn/motor.html is served at /learn/motor),
+# and unknown paths get dist/404.html, so no single-page-app rewrite is needed.

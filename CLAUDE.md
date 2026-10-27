@@ -6,25 +6,30 @@ Project context for Claude Code. `HANDOVER.md` (kept local, git-ignored) has the
 
 A static study website for learning **Indian insurance**, aimed at Business Analysts. Four tabs:
 
-1. **Learn** (`#learn`): 9 modules of points to tick off, 8-week plan, glossary, sources.
-2. **Interview prep** (`#interview`, `#interview/<category>`): 89 questions with model answers, worked examples, diagram links, filters, practised tracker.
-3. **Calculators** (`#calculators/<car|tw|cv|health|life>`): step-by-step premium rating with formulas, rule flags and scenario comparison.
-4. **Whiteboard** (`#whiteboard`): SVG drawing canvas with flowchart and BPMN shapes, swimlane pools, connectors, templates, undo, PNG/SVG export. Board saved in localStorage key `ibd-whiteboard`; shapes and templates in `src/whiteboard/model.ts`.
+1. **Learn** (`/`, `/learn/<module-id>`, `/learn/diagrams`, `/learn/study-plan`, `/learn/glossary`): 9 modules of points to tick off, 8-week plan, glossary, sources.
+2. **Interview prep** (`/interview`, `/interview/<category-slug>`): 89 questions with model answers, worked examples, diagram links, filters, practised tracker.
+3. **Calculators** (`/calculators/<car|two-wheeler|commercial-vehicle|health|term-life>-insurance`): step-by-step premium rating with formulas, rule flags and scenario comparison.
+4. **Whiteboard** (`/whiteboard`, `?start=blank`): SVG drawing canvas with flowchart and BPMN shapes, swimlane pools, connectors, templates, undo, PNG/SVG export. Board saved in localStorage key `ibd-whiteboard`; shapes and templates in `src/whiteboard/model.ts`.
 
 Rules and rates are **as of 26 October 2026** (`AS_OF` in `src/data/learn.ts`).
 
 ## Stack and commands
 
 - Vite 8, React 19, TypeScript 7 (strict), plain CSS. No backend, no router library, no UI kit.
-- Node 22+. `npm install`, `npm run dev` (port 5173), `npm run build` (runs `tsc --noEmit` then `vite build` → `dist/`), `npm run preview` (port 4173), `npm test` (Vitest, `src/calc/totals.test.ts`).
-- Live on Cloudflare Pages: https://insurance-tool-kit.pages.dev (build `npm run build`, output `dist`, env `NODE_VERSION=22`); every push to `main` redeploys. `netlify.toml` is kept as a fallback for Netlify.
+- Node 22+. `npm install`, `npm run dev` (port 5173), `npm run build` (runs `tsc --noEmit`, `vite build`, an SSR build of `src/entry-server.tsx` into `dist-ssr/`, then `scripts/prerender.mjs`, which writes every route as `dist/<path>.html` plus `404.html`, `sitemap.xml`, `robots.txt` and deletes `dist-ssr/`), `npm run preview` (port 4173), `npm test` (Vitest: `src/calc/totals.test.ts`, `src/routes.test.ts`).
+- Live on Cloudflare Pages: https://insurance-tool-kit.pages.dev (build `npm run build`, output `dist`, env `NODE_VERSION=22`); every push to `main` redeploys. Cloudflare Web Analytics is switched on in the Pages dashboard, not in code (Cloudflare injects the beacon at the edge). `SITE_URL` in `src/routes.ts` drives canonical, Open Graph and sitemap URLs. `netlify.toml` is kept as a fallback for Netlify.
 
 ## Layout
 
 ```
-src/App.tsx              masthead + tabs, hash routing via useHashTab()
-src/hooks.ts             useStoredState (localStorage with try/catch), useHashTab
-src/components/          Learn.tsx, Interview.tsx, Calculators.tsx, Diagrams.tsx (inline SVG reference diagrams; #learn/d-<id> scrolls to one)
+src/App.tsx              masthead + tabs, renders the page for parseRoute(path), keeps <head> tags in sync
+src/routes.ts            URL scheme (paths.*), parseRoute, routeMeta (titles/descriptions/canonical), allPaths, legacyHashPath, SITE_URL
+src/router.tsx           RouterProvider (History API), useRouter, <Link>, jumpTo
+src/main.tsx             client entry: redirects old #tab links, then createRoot (renders over the prerendered HTML, no hydration, because localStorage and today's date differ from the build)
+src/entry-server.tsx     buildFiles(): renderToString for every route + head tags, sitemap, robots, 404
+scripts/prerender.mjs    writes buildFiles() output into dist/
+src/hooks.ts             useStoredState (localStorage with try/catch, skipped on the server)
+src/components/          Learn.tsx (page prop: home | module | diagrams | plan | glossary), Interview.tsx, Calculators.tsx, Diagrams.tsx (inline SVG reference diagrams; /learn/diagrams#d-<id> scrolls to one)
 src/data/learn.ts        MODULES, STUDY_PLAN, GLOSSARY, SOURCES, AS_OF  ← content lives here
 src/data/interview.ts    QUESTIONS, CATEGORIES                        ← content lives here
 src/calc/types.ts        State, Field, Section, Result, Product types
@@ -64,6 +69,8 @@ src/styles.css           design tokens (light + dark), all component styles
 - Learn content: each module has `summary` and `context`; each topic has `intro`; each point is `{ t, d, ex? }` (idea, explanation, example). Progress ticks are keyed by point index, so append new points rather than reordering. Examples that quote premiums should match the calculator defaults.
 - Colours only via CSS tokens on `:root` with dark overrides; no hard-coded colours in components.
 - Keep the site static and dependency-light; ask before adding libraries.
+- Navigation uses `<Link to>` (real hrefs, crawlable) rather than buttons with callbacks. Components must render without `window`/`document`/`localStorage` during render (they run in Node at build time); browser APIs go in effects or handlers.
+- Interview answers stay in the DOM with `hidden` until revealed, so the prerendered pages contain them.
 
 ## Known gaps / good next tasks
 
